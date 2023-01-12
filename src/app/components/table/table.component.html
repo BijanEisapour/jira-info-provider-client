@@ -1,0 +1,58 @@
+<input type="text" #searchText nz-input placeholder="input search text" (keyup.enter)="search(searchText.value)" />
+<nz-table
+    #filterTable
+    [nzData]="listOfData"
+    nzTableLayout="fixed"
+    [nzPageSize]="100"
+    [nzScroll]="{x: '300vw', y: '70vh'}"
+>
+    <thead>
+        <tr>
+            <th nzWidth="64px"></th>
+
+            <th
+                *ngFor="let column of listOfColumns"
+                [nzSortOrder]="column.sortOrder"
+                [nzSortFn]="column.sortFn"
+                [nzSortDirections]="column.sortDirections"
+                [nzFilterMultiple]="column.filterMultiple"
+                [nzFilters]="column.listOfFilter"
+                [nzFilterFn]="column.filterFn"
+            >
+                {{ column.name }}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let data of filterTable.data; let index = index">
+            <td>{{ index + 1 }}</td>
+            <td>
+                <div *ngIf="data.labels !== ''">
+                    <nz-tag
+                        *ngFor="let label of data.labels | splitBy : '|'"
+                        [nzColor]="'blue'"
+                        nzMode="checkable"
+                        [nzChecked]="false"
+                        (nzCheckedChange)="filterByLabel(label)"
+                        >{{ label }}</nz-tag
+                    >
+                </div>
+            </td>
+            <td>{{ data.assignee }}</td>
+            <td>
+                <a [href]="data.link">{{ data.link }}</a>
+            </td>
+            <td>{{ data.summary }}</td>
+            <td>{{ data.version }}</td>
+            <td>{{ data.priority }}</td>
+            <td>{{ data.key }}</td>
+            <td>{{ data.component }}</td>
+            <td>{{ data.status }}</td>
+            <td>{{ data.starCis }}</td>
+            <td>{{ data.slaColor }}</td>
+            <td class="date-column">{{ toDaysMinutesSeconds(data.sla) }}</td>
+            <td>{{ data.creationDate }}</td>
+            <td>{{ data.resolutionDate }}</td>
+        </tr>
+    </tbody>
+</nz-table>
