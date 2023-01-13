@@ -1,11 +1,5 @@
-<input type="text" #searchText nz-input placeholder="input search text" (keyup.enter)="search(searchText.value)" />
-<nz-table
-    #filterTable
-    [nzData]="listOfData"
-    nzTableLayout="fixed"
-    [nzPageSize]="100"
-    [nzScroll]="{x: '300vw', y: '70vh'}"
->
+<input type="text" #searchText nz-input placeholder="جست‌و‌جو" (keyup.enter)="search(searchText.value)" />
+<nz-table #filterTable [nzData]="listOfData" nzTableLayout="fixed" [nzPageSize]="100" [nzScroll]="{y: '70vh'}">
     <thead>
         <tr>
             <th nzWidth="64px"></th>
@@ -18,41 +12,106 @@
                 [nzFilterMultiple]="column.filterMultiple"
                 [nzFilters]="column.listOfFilter"
                 [nzFilterFn]="column.filterFn"
+                [nzWidth]="column.width"
             >
                 {{ column.name }}
             </th>
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let data of filterTable.data; let index = index">
+        <tr *ngFor="let data of filterTable.data; let index = index" (dblclick)="openLink(data)">
             <td>{{ index + 1 }}</td>
             <td>
-                <div *ngIf="data.labels !== ''">
+                <a [href]="data.link" target="_blank">{{ data.key }}</a>
+            </td>
+            <td>
+                <ng-container *ngIf="data.assignee !== this.dataService.NO_ASSIGNEE; else noAssignee">
                     <nz-tag
-                        *ngFor="let label of data.labels | splitBy : '|'"
-                        [nzColor]="'blue'"
+                        [nzColor]="data.assignee | tagColor : assigneesList"
                         nzMode="checkable"
                         [nzChecked]="false"
-                        (nzCheckedChange)="filterByLabel(label)"
+                        (nzCheckedChange)="filterBy(data.assignee?.toString(), 'assignee')"
+                    >
+                        {{ data.assignee }}
+                    </nz-tag>
+                </ng-container>
+                <ng-template #noAssignee>
+                    <nz-tag
+                        [nzColor]="'#aaa'"
+                        nzMode="checkable"
+                        [nzChecked]="false"
+                        (nzCheckedChange)="filterBy(this.dataService.NO_ASSIGNEE, 'assignee')"
+                    >
+                        {{ this.dataService.NO_ASSIGNEE }}
+                    </nz-tag>
+                </ng-template>
+            </td>
+
+            <td>
+                <ng-container *ngIf="data.component !== ''">
+                    <nz-tag
+                        [nzColor]="'green'"
+                        nzMode="checkable"
+                        [nzChecked]="false"
+                        (nzCheckedChange)="filterBy(data.component?.toString(), 'component')"
+                    >
+                        {{ data.component }}
+                    </nz-tag>
+                </ng-container>
+            </td>
+            <td>{{ data.creationDate }}</td>
+            <td>
+                <ng-container *ngIf="data.labels !== ''">
+                    <nz-tag
+                        *ngFor="let label of data.labels | splitBy : '|'"
+                        [nzColor]="'volcano'"
+                        nzMode="checkable"
+                        [nzChecked]="false"
+                        (nzCheckedChange)="filterBy(label, 'labels')"
                         >{{ label }}</nz-tag
                     >
-                </div>
+                </ng-container>
             </td>
-            <td>{{ data.assignee }}</td>
             <td>
-                <a [href]="data.link">{{ data.link }}</a>
+                <nz-tag
+                    [nzColor]="'orange'"
+                    nzMode="checkable"
+                    [nzChecked]="false"
+                    (nzCheckedChange)="filterBy(data.priority?.toString(), 'priority')"
+                >
+                    {{ data.priority }}
+                </nz-tag>
             </td>
-            <td>{{ data.summary }}</td>
-            <td>{{ data.version }}</td>
-            <td>{{ data.priority }}</td>
-            <td>{{ data.key }}</td>
-            <td>{{ data.component }}</td>
-            <td>{{ data.status }}</td>
-            <td>{{ data.starCis }}</td>
-            <td>{{ data.slaColor }}</td>
-            <td class="date-column">{{ toDaysMinutesSeconds(data.sla) }}</td>
-            <td>{{ data.creationDate }}</td>
             <td>{{ data.resolutionDate }}</td>
+            <td>{{ data.status }}</td>
+            <td>{{ data.summary }}</td>
+            <td>
+                <nz-tag
+                    [nzColor]="'purple'"
+                    nzMode="checkable"
+                    [nzChecked]="false"
+                    (nzCheckedChange)="filterBy(data.version?.toString(), 'version')"
+                >
+                    {{ data.version }}
+                </nz-tag>
+            </td>
+
+            <td class="date-column">
+                <nz-tag [nzColor]="slaColorMap.get(data.slaColor ?? 'default')">
+                    {{ data.sla | secondsToDHMS }}
+                </nz-tag>
+            </td>
+
+            <td>
+                <nz-tag
+                    [nzColor]="'geekblue'"
+                    nzMode="checkable"
+                    [nzChecked]="false"
+                    (nzCheckedChange)="filterBy(data.starCis?.toString(), 'starCis')"
+                >
+                    {{ data.starCis }}
+                </nz-tag>
+            </td>
         </tr>
     </tbody>
 </nz-table>

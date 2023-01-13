@@ -4,9 +4,11 @@ import {NzTableFilterFn, NzTableFilterList, NzTableSortFn, NzTableSortOrder} fro
 import {DataService} from '../../services/data.service';
 import {Bug} from '../../models/bug';
 import {NzSafeAny} from 'ng-zorro-antd/core/types';
+import {DataType} from '../../models/data-type';
 
 interface ColumnItem {
     name: string;
+    field: string;
     sortOrder: NzTableSortOrder | null;
     sortFn: NzTableSortFn<Bug> | null;
     listOfFilter: NzTableFilterList;
@@ -14,6 +16,7 @@ interface ColumnItem {
     filterMultiple: boolean;
     sortDirections: NzTableSortOrder[];
     priority: number | boolean;
+    width: string;
 }
 
 @Component({
@@ -26,27 +29,35 @@ export class TableComponent implements AfterViewInit {
     public listOfData: Bug[] = [];
     public copyListOfData: Bug[] = [];
 
+    public assigneesList: string[] | undefined = [];
+    public slaColorMap = new Map<string, string>();
+
     private currentFilter: string | null = null;
 
-    public constructor(private dataService: DataService, private chRef: ChangeDetectorRef) {}
+    public constructor(public dataService: DataService, private chRef: ChangeDetectorRef) {}
 
     public ngAfterViewInit(): void {
-        this.listOfData = this.dataService.demoData;
+        this.listOfData = this.dataService.data;
         this.copyListOfData = [...this.listOfData];
 
         this.generateTableColumns();
 
+        this.generateAssigneesList();
+        this.generateSlaColorMap();
+
         this.chRef.detectChanges();
     }
 
-    public filterByLabel(label: string): void {
+    public filterBy(name: string | undefined, filterBy: string): void {
+        if (name == null) return;
+
         let performFilter = true;
-        if (this.currentFilter === label) {
+        if (this.currentFilter === name) {
             performFilter = false;
             this.currentFilter = null;
-        } else this.currentFilter = label;
+        } else this.currentFilter = name;
 
-        if (performFilter) this.search(label, 'labels');
+        if (performFilter) this.search(name, filterBy);
         else this.resetFilter();
     }
 
@@ -68,24 +79,24 @@ export class TableComponent implements AfterViewInit {
         this.listOfData = targetValue;
     }
 
-    public toDaysMinutesSeconds(totalSeconds: number | undefined): string {
-        if (totalSeconds == null) return '';
-
-        totalSeconds = totalSeconds > 0 ? totalSeconds : totalSeconds * -1;
-        const seconds = Math.floor(totalSeconds % 60);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
-        const days = Math.floor(totalSeconds / (3600 * 24));
-
-        const secondsStr = TableComponent.makeHumanReadable(seconds, 'second');
-        const minutesStr = TableComponent.makeHumanReadable(minutes, 'minute');
-        const hoursStr = TableComponent.makeHumanReadable(hours, 'hour');
-        const daysStr = TableComponent.makeHumanReadable(days, 'day');
-
-        return `${daysStr}${hoursStr}${minutesStr}${secondsStr}`.replace(/,\s*$/, '');
+    private generateTableColumns(): void {
+        this.listOfColumns = [
+            this.generateColumn('link', {name: 'لینک'}),
+            this.generateColumn('assignee', {name: 'گماشته', priority: 2}),
+            this.generateColumn('component', {name: 'کامپوننت'}),
+            this.generateColumn('creationDate', {name: 'تاریخ ساخت'}, DataType.DATE),
+            this.generateColumn('labels', {name: 'گروه‌', priority: 1}),
+            this.generateColumn('priority', {name: 'اولویت', priority: 4, width: '120px'}),
+            this.generateColumn('resolutionDate', {}, DataType.DATE),
+            this.generateColumn('status', {name: 'وضعیت'}),
+            this.generateColumn('summary', {name: 'عنوان', width: '360px'}),
+            this.generateColumn('version', {name: 'ورژن', priority: 3, width: '120px'}),
+            this.generateColumn('sla', {name: 'زمان باقیمانده', width: '300px'}, DataType.NUMBER),
+            this.generateColumn('starCis'),
+        ];
     }
 
-    private generateColumn(key: string, overrideOptions: any = {}): ColumnItem {
+    private generateColumn(key: keyof Bug, overrideOptions: any = {}, dataType: DataType = DataType.TEXT): ColumnItem {
         const listOfColumnUniqueValues = [...new Set(this.listOfData.map((x) => x[key as keyof Bug]))];
         const listOfFilter = new Array<{
             text: string;
@@ -105,8 +116,17 @@ export class TableComponent implements AfterViewInit {
             name: key,
             sortOrder: null,
             sortFn: (a: Bug, b: Bug): any => {
-                // @ts-ignore
-                return a[key].toString().localeCompare(b[key]);
+                switch (dataType) {
+                    case DataType.TEXT:
+                        return a[key]!.toString().localeCompare(b[key]!.toString());
+                    case DataType.NUMBER:
+                        return (a[key] as number) - (b[key] as number);
+                    case DataType.DATE: {
+                        const firstDate = new Date(b[key]!);
+                        const secondDate = new Date(a[key]!);
+                        return firstDate.getDate() - secondDate.getDate();
+                    }
+                }
             },
             sortDirections: ['ascend', 'descend', null],
             filterMultiple: true,
@@ -115,34 +135,31 @@ export class TableComponent implements AfterViewInit {
                 return list.some((value) => item[key as keyof Bug]?.toString().indexOf(value) !== -1);
             },
             priority: false,
+            width: '200px',
             ...overrideOptions,
+            field: key,
         };
-    }
-
-    private generateTableColumns(): void {
-        this.listOfColumns = [
-            this.generateColumn('labels', {sortOrder: 'descend', name: 'گروه‌', priority: 1}),
-            this.generateColumn('assignee', {name: 'گماشته', priority: 2}),
-            this.generateColumn('link', {name: 'لینک'}),
-            this.generateColumn('summary', {name: 'عنوان'}),
-            this.generateColumn('version', {name: 'ورژن', priority: 3}),
-            this.generateColumn('priority', {name: 'اولویت', priority: 4}),
-            this.generateColumn('key'),
-            this.generateColumn('component'),
-            this.generateColumn('status'),
-            this.generateColumn('starCis'),
-            this.generateColumn('slaColor'),
-            this.generateColumn('sla'),
-            this.generateColumn('creationDate'),
-            this.generateColumn('resolutionDate'),
-        ];
-    }
-
-    private static makeHumanReadable(num: number, singular: string): string {
-        return num > 0 ? num + (num === 1 ? `${singular}, ` : `${singular}s, `) : '';
     }
 
     private resetFilter(): void {
         this.listOfData = [...this.copyListOfData];
+    }
+
+    public openLink(data: Bug): void {
+        window.open(data.link, '_blank');
+    }
+
+    private generateAssigneesList(): void {
+        this.assigneesList = this.listOfColumns
+            .find((x) => x.field === 'assignee')
+            ?.listOfFilter.map((y): string => y.value);
+    }
+
+    private generateSlaColorMap(): void {
+        this.slaColorMap.set('قرمز', 'red');
+        this.slaColorMap.set('آبی', 'blue');
+        this.slaColorMap.set('زرد', 'gold');
+        this.slaColorMap.set('سبز', 'green');
+        this.slaColorMap.set('default', 'blue');
     }
 }

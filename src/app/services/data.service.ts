@@ -5,7 +5,9 @@ import {Bug} from '../models/bug';
     providedIn: 'root',
 })
 export class DataService {
-    public demoData: Bug[] = [
+    public readonly NO_ASSIGNEE = 'ناگماشته';
+
+    private _data: Bug[] = [
         {
             id: 404195,
             key: 'DATALM-91934',
@@ -1129,4 +1131,35 @@ export class DataService {
             starCis: 'PAPortal',
         },
     ];
+
+    public get data(): Bug[] {
+        this.cleanData();
+
+        return this._data;
+    }
+
+    public getCountBy(prop: keyof Bug): any {
+        const resultData: {[klass: string]: number} = {};
+
+        const labels: string[] = [...new Set(this.data.map((x) => x[prop as keyof Bug]?.toString() ?? ''))];
+
+        labels.forEach((x: string) => {
+            resultData[x] = 0;
+        });
+
+        this.data.forEach((x) => {
+            resultData[x[prop]!]++;
+        });
+
+        return resultData;
+    }
+
+    private cleanData(): void {
+        this._data.forEach((x) => {
+            const index = this._data.findIndex((y) => x.id === y.id);
+            if (x.assignee === '') {
+                this._data[index].assignee = this.NO_ASSIGNEE;
+            }
+        });
+    }
 }
