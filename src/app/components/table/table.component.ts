@@ -127,7 +127,7 @@ export class TableComponent implements AfterViewInit {
                     }
                 }
             },
-            sortDirections: ['ascend', 'descend', null],
+            sortDirections: ['descend', 'ascend', null],
             filterMultiple: true,
             listOfFilter: listOfFilter,
             filterFn: (list: string[], item: Bug): any => {
