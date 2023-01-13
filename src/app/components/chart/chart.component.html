@@ -1,1 +1,7 @@
-<div echarts [options]="chartOption" class="chart"></div>
+<div
+    echarts
+    class="chart"
+    [options]="chartOption"
+    (chartInit)="chartInitHandler($event)"
+    (chartClick)="chartClickHandler($event)"
+></div>

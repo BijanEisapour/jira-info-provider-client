@@ -7,24 +7,13 @@ import {DataService} from '../../services/data.service';
     styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent {
-    public assigneeXAxis: string[] = [];
-    public assigneeData: number[] = [];
-
-    public labelsXAxis: string[] = [];
-    public labelData: number[] = [];
+    public assigneeData: {} = {};
+    public assigneeDrillDownData: any = [];
+    public labelData: {} = {};
     public constructor(private dataService: DataService) {
-        const assignees = dataService.getCountBy('assignee');
+        this.assigneeData = dataService.getCountBy('assignee');
+        this.assigneeDrillDownData = dataService.getDrillDownData('assignee', 'labels');
 
-        Object.keys(assignees).forEach((key) => {
-            this.assigneeXAxis.push(key);
-            this.assigneeData.push(assignees[key]);
-        });
-
-        const labels = dataService.getCountBy('labels');
-
-        Object.keys(labels).forEach((key) => {
-            this.labelsXAxis.push(key);
-            this.labelData.push(labels[key]);
-        });
+        this.labelData = dataService.getCountBy('labels');
     }
 }

@@ -61,7 +61,7 @@
             </td>
             <td>{{ data.creationDate }}</td>
             <td>
-                <ng-container *ngIf="data.labels !== ''">
+                <ng-container *ngIf="data.labels !== dataService.NO_LABEL">
                     <nz-tag
                         *ngFor="let label of data.labels | splitBy : '|'"
                         [nzColor]="'volcano'"
@@ -74,7 +74,7 @@
             </td>
             <td>
                 <nz-tag
-                    [nzColor]="'orange'"
+                    [nzColor]="data.priority | priorityColor"
                     nzMode="checkable"
                     [nzChecked]="false"
                     (nzCheckedChange)="filterBy(data.priority?.toString(), 'priority')"
@@ -82,8 +82,16 @@
                     {{ data.priority }}
                 </nz-tag>
             </td>
-            <td>{{ data.resolutionDate }}</td>
-            <td>{{ data.status }}</td>
+            <td>
+                <nz-tag
+                    [nzColor]="data.status | statusColor"
+                    nzMode="checkable"
+                    [nzChecked]="false"
+                    (nzCheckedChange)="filterBy(data.status?.toString(), 'status')"
+                >
+                    {{ data.status }}
+                </nz-tag>
+            </td>
             <td>{{ data.summary }}</td>
             <td>
                 <nz-tag

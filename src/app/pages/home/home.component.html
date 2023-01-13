@@ -1,5 +1,10 @@
 <div class="wrapper">
     <app-table></app-table>
-    <app-chart [data]="assigneeData" [xAxisData]="assigneeXAxis"></app-chart>
-    <app-chart [data]="labelData" [xAxisData]="labelsXAxis"></app-chart>
+    <app-chart
+        type="bar"
+        chartTitle="نمودار تعداد باگ هر شخص"
+        [drilldownData]="assigneeDrillDownData"
+        [data]="assigneeData"
+    ></app-chart>
+    <app-chart type="pie" chartTitle="نمودار تعداد باگ هر گروه" [data]="labelData"></app-chart>
 </div>

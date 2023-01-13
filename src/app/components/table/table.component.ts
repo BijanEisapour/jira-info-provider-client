@@ -87,7 +87,6 @@ export class TableComponent implements AfterViewInit {
             this.generateColumn('creationDate', {name: 'تاریخ ساخت'}, DataType.DATE),
             this.generateColumn('labels', {name: 'گروه‌', priority: 1}),
             this.generateColumn('priority', {name: 'اولویت', priority: 4, width: '120px'}),
-            this.generateColumn('resolutionDate', {}, DataType.DATE),
             this.generateColumn('status', {name: 'وضعیت'}),
             this.generateColumn('summary', {name: 'عنوان', width: '360px'}),
             this.generateColumn('version', {name: 'ورژن', priority: 3, width: '120px'}),

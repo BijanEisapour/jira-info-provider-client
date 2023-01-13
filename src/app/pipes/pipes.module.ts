@@ -7,6 +7,8 @@ import {WordsToTitleCasePipe} from './words-to-title-case.pipe';
 import {SplitByPipe} from './split-by.pipe';
 import {SecondsToDayHourMinuteSecondPipe} from './seconds-to-day-hour-minute-second.pipe';
 import {TagColorPipe} from './tag-color.pipe';
+import {PriorityColorPipe} from './priority-color.pipe';
+import {StatusColorPipe} from './status-color.pipe';
 
 @NgModule({
     declarations: [
@@ -16,6 +18,8 @@ import {TagColorPipe} from './tag-color.pipe';
         SplitByPipe,
         SecondsToDayHourMinuteSecondPipe,
         TagColorPipe,
+        PriorityColorPipe,
+        StatusColorPipe,
     ],
     imports: [CommonModule],
     exports: [
@@ -25,6 +29,8 @@ import {TagColorPipe} from './tag-color.pipe';
         SplitByPipe,
         SecondsToDayHourMinuteSecondPipe,
         TagColorPipe,
+        PriorityColorPipe,
+        StatusColorPipe,
     ],
 })
 export class PipesModule {}
