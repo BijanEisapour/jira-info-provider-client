@@ -21,8 +21,6 @@ export class ChartComponent implements AfterViewInit {
         const data = this.generateData();
 
         this.chartOption = this.generateChartOption(data);
-
-        this.someStuff();
     }
 
     private generateData(): any {
@@ -135,8 +133,6 @@ export class ChartComponent implements AfterViewInit {
         }
         return options;
     }
-
-    private someStuff(): void {}
 
     public chartInitHandler(chart: ECharts): void {
         this.chart = chart;
